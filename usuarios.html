@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="usuarios.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="home.html">Inicio</a></li>
+            <li><a href="salones.html">Salones</a></li>
+            <li><a href="usuarios.html">Docentes</a></li>
+        </ul>
+        <div class="profile-icon" onclick="redirectToProfile()">
+            <img src="./Iconos/perfil.png" alt="Perfil">
+        </div>
+        <div class="logout-icon" onclick="logout()">
+            <img src="./Iconos/cerrar.png" alt="Cerrar sesión">
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Usuarios</h1>
+        <button id="open-form-button">Agregar Usuario</button>
+        <table id="usuarios-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se insertarán aquí mediante JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="usuario-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <form id="usuario-form">
+                <input type="hidden" id="usuario-id" name="id">
+                <div>
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div>
+                    <label for="apellido">Apellido:</label>
+                    <input type="text" id="apellido" name="apellido" required>
+                </div>
+                <div>
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" id="direccion" name="direccion" required>
+                </div>
+                <div>
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" name="telefono" required>
+                </div>
+                <button type="submit">Guardar</button>
+                <button type="button" id="update-button" style="display:none;">Actualizar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function redirectToProfile() {
+            window.location.href = 'perfil.html';
+        }
+
+        function logout() {
+            alert("Sesión cerrada");
+            window.location.href = 'index.html'; 
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('usuarios-table').getElementsByTagName('tbody')[0];
+            const form = document.getElementById('usuario-form');
+            const updateButton = document.getElementById('update-button');
+            const modal = document.getElementById('usuario-modal');
+            const openFormButton = document.getElementById('open-form-button');
+            const closeButton = document.querySelector('.close-button');
+
+            openFormButton.addEventListener('click', () => {
+                form.reset();
+                document.getElementById('usuario-id').value = '';
+                updateButton.style.display = 'none';
+                modal.style.display = 'block';
+            });
+
+            closeButton.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            function fetchUsuarios() {
+                return fetch('http://localhost:8080/usuarios/api/v1/all')
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('Error:', error);
+                        return [];
+                    });
+            }
+
+            function fetchUsuarios() {
+                fetch('http://localhost:8080/usuarios/api/v1/all')
+                    .then(response => response.json())
+                    .then(data => {
+                        tableBody.innerHTML = '';
+                        data.forEach(usuario => {
+                            const row = tableBody.insertRow();
+                            row.insertCell(0).textContent = usuario.id;
+                            row.insertCell(1).textContent = usuario.nombre;
+                            row.insertCell(2).textContent = usuario.apellido;
+                            row.insertCell(3).textContent = usuario.direccion;
+                            row.insertCell(4).textContent = usuario.telefono;
+
+                            const actionsCell = row.insertCell(5);
+                            const editButton = document.createElement('button');
+                            editButton.textContent = 'Editar';
+                            editButton.onclick = () => editUsuario(usuario);
+                            actionsCell.appendChild(editButton);
+
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Eliminar';
+                            deleteButton.onclick = () => deleteUsuario(usuario.id);
+                            actionsCell.appendChild(deleteButton);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function saveUsuario(usuario) {
+                const isUpdating = usuario.id && usuario.id !== '';
+                const url = `http://localhost:8080/usuarios/api/v1/save/${isUpdating ? usuario.id : 'null'}`;
+                console.log('Saving usuario:', usuario);
+
+                fetch(url, {
+                    method: 'POST', // Use POST for both save and update
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(usuario),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(id => {
+                    console.log('Saved usuario with ID:', id);
+                    form.reset();
+                    modal.style.display = 'none';
+                    fetchUsuarios();
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            function editUsuario(usuario) {
+                document.getElementById('usuario-id').value = usuario.id;
+                document.getElementById('nombre').value = usuario.nombre;
+                document.getElementById('apellido').value = usuario.apellido;
+                document.getElementById('direccion').value = usuario.direccion;
+                document.getElementById('telefono').value = usuario.telefono;
+                updateButton.style.display = 'block';
+                modal.style.display = 'block';
+            }
+
+            function deleteUsuario(id) {
+                fetch(`http://localhost:8080/usuarios/api/v1/delete/${id}`)
+                    .then(() => fetchUsuarios())
+                    .catch(error => console.error('Error:', error));
+            }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const usuario = {
+                    id: document.getElementById('usuario-id').value,
+                    nombre: document.getElementById('nombre').value,
+                    apellido: document.getElementById('apellido').value,
+                    direccion: document.getElementById('direccion').value,
+                    telefono: document.getElementById('telefono').value
+                };
+                saveUsuario(usuario);
+            });
+
+            updateButton.addEventListener('click', function() {
+                const usuario = {
+                    id: document.getElementById('usuario-id').value,
+                    nombre: document.getElementById('nombre').value,
+                    apellido: document.getElementById('apellido').value,
+                    direccion: document.getElementById('direccion').value,
+                    telefono: document.getElementById('telefono').value
+                };
+                saveUsuario(usuario);
+                updateButton.style.display = 'none';
+            });
+
+            fetchUsuarios();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProyectoWeb</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+<div class="content">
+    <div class="content-left">
+        <div class="form-wrapper">
+            <div class="logo">
+            </div>
+            <h1 class="text-title">Ingresar</h1>
+            <form id="formulario-sesion">
+              <div class="field-group">
+                  <label class="label" for="txt-email">Correo Electrónico</label>
+                  <input class="input" type="text" id="txt-email" name="email" />
+              </div>
+              <div class="field-group">
+                  <div class="label-wrapper">
+                      <label class="label" for="txt-password">Contraseña</label>
+                      <label class="label label--right" onclick="togglePassword()">
+                          <svg class="label-icon eye is--show" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          <svg class="label-icon eye-off is--hide" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye-off">
+                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                              <line x1="1" y1="1" x2="23" y2="23"></line>
+                          </svg>
+                          <span class="label-text">Mostrar</span>
+                      </label>
+                  </div>
+                  <input class="input" type="password" id="txt-password" name="password" />
+                  <div class="forgot-password"><a href="#" id="forgot-password-link">¿Olvidaste tu contraseña?</a></div>
+              </div>
+
+              <div class="field-group">
+                  <input class="btn-submit" type="submit" value="Ingresar" />
+              </div>
+
+              <div class="field-group">
+                  <label class="checkbox-label">Mantener sesión iniciada
+                      <input type="checkbox" />
+                      <span class="checkbox-checkmark"></span>
+                  </label>
+              </div>
+
+              <div id="message" class="message"></div> <!-- Mensaje de éxito o error -->
+            </form>
+
+        </div>
+    </div>
+    <div class="content-right">
+        <img class="login-image" src="login.png" alt="Imagen de inicio de sesión" />
+    </div>
+</div>
+<footer>
+    <span class="author">©Jeison David 2024</span>
+</footer>
+
+<script type="module" src="firebaseconect.js"></script>
+<script type="module" src="login.js"></script>
+<script>
+    function togglePassword() {
+        var p = document.querySelector('#txt-password');
+        var t = document.querySelector('.label-text');
+        var ey = document.querySelector('.eye');
+        var eyo = document.querySelector('.eye-off');
+        var currType = p.getAttribute('type');
+
+        if (currType === 'password') {
+            t.innerHTML = 'Ocultar';
+            p.setAttribute('type', 'text');
+            ey.classList.replace('is--show', 'is--hide');
+            eyo.classList.replace('is--hide', 'is--show');
+        } else {
+            t.innerHTML = 'Mostrar';
+            p.setAttribute('type', 'password');
+            eyo.classList.replace('is--show', 'is--hide');
+            ey.classList.replace('is--hide', 'is--show');
+        }
+    }
+</script>
+</body>
+</html>

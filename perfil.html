@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Usuario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="home.html">Inicio</a></li>
+        </ul>
+    </nav>
+
+    <div class="profile-form">
+        <h2>Detalles del usuario</h2>
+        <form id="profile-form">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido">
+            <label for="correo">Correo</label>
+            <input type="email" id="correo" disabled>
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion">
+            <div class="button-container">
+                <button type="button" class="btn green" id="save-profile-btn">Guardar</button>
+                <button type="button" class="btn black" id="cancel-profile-btn">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+
+        // Configuración de Firebase (asegúrate de que coincida con tu configuración en firebase.js)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzY2h4HwfBTNuJ7w0kzdaV5CWn98hW6L0",
+            authDomain: "salones-e2e70.firebaseapp.com",
+            projectId: "salones-e2e70",
+            storageBucket: "salones-e2e70.appspot.com",
+            messagingSenderId: "1747658641",
+            appId: "1:1747658641:web:22f3082e4a9062781c1c30"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
+
+        // Función para cargar los datos del perfil del usuario
+        async function loadProfile() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log('Usuario autenticado:', user.email);  // Asegúrate de que el usuario está autenticado
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        console.log('Datos del usuario:', userData);
+                        document.getElementById("nombre").value = userData.nombre || "";
+                        document.getElementById("apellido").value = userData.apellido || "";
+                        document.getElementById("correo").value = user.email || "";  // Mostrar el correo del usuario autenticado
+                        document.getElementById("direccion").value = userData.direccion || "";
+                    } else {
+                        console.log('El documento del usuario no existe.');
+                    }
+                } else {
+                    console.log('No hay usuario autenticado.');
+                    // Redirigir a la página de inicio de sesión si no hay un usuario conectado
+                    window.location.href = "index.html";
+                }
+            });
+        }
+
+        // Llamar a loadProfile cuando la página cargue
+        window.addEventListener('DOMContentLoaded', (event) => {
+            console.log('Página cargada, llamando a loadProfile');
+            loadProfile();
+        });
+
+        // Función para guardar los datos del perfil del usuario
+        async function saveProfile() {
+            const user = auth.currentUser;
+            if (user) {
+                const userDocRef = doc(db, "users", user.uid);
+                await setDoc(userDocRef, {
+                    nombre: document.getElementById("nombre").value,
+                    apellido: document.getElementById("apellido").value,
+                    direccion: document.getElementById("direccion").value
+                }, { merge: true });
+
+                alert("Perfil guardado");
+                window.location.href = 'home.html';
+            } else {
+                console.log('No hay usuario autenticado para guardar el perfil.');
+            }
+        }
+
+        // Función para cancelar la edición del perfil
+        function cancelProfile() {
+            localStorage.setItem('previousPage', window.location.href);
+            window.history.back();
+        }
+
+        // Asignar los eventos a los botones
+        document.getElementById('save-profile-btn').addEventListener('click', saveProfile);
+        document.getElementById('cancel-profile-btn').addEventListener('click', cancelProfile);
+    </script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="salones.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="home.html">Inicio</a></li>
+            <li><a href="salones.html">Salones</a></li>
+            <li><a href="usuarios.html">Usuarios</a></li>
+        </ul>
+        <div class="profile-icon" onclick="redirectToProfile()">
+            <img src="./Iconos/perfil.png" alt="Perfil">
+        </div>
+        <div class="logout-icon" onclick="logout()">
+            <img src="./Iconos/cerrar.png" alt="Cerrar sesión">
+        </div>
+    </nav>
+    
+
+    <div class="container">
+        <h1>Salones</h1>
+        <button id="open-form-button">Agregar Salón</button>
+        <table id="salones-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Salón<span class="tooltip" data-tooltip="Espacio dentro del bloque para clases y conferencias."><img src="./Iconos/pregunta.png" alt="Tooltip"></span></th>
+                    <th>Piso<span class="tooltip" data-tooltip="Nivel dentro del edificio."><img src="./Iconos/pregunta.png" alt="Tooltip"></span></th>
+                    <th>Bloque <span class="tooltip" data-tooltip="Edificio dentro de la universidad donde estan las aulas, oficinas y laboratorios."><img src="./Iconos/pregunta.png" alt="Tooltip"></span></th>
+                    <th>Horario</th>
+                    <th>Día</th>
+                    <th>Profesor</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se insertarán aquí mediante JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="salon-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <form id="salon-form">
+                <input type="hidden" id="salon-id" name="id">
+                <div>
+                    <label for="salon">Salón:</label>
+                    <input type="text" id="salon" name="salon" required>
+                </div>
+                <div>
+                    <label for="piso">Piso:</label>
+                    <input type="text" id="piso" name="piso" required>
+                </div>
+                <div>
+                    <label for="bloque">Bloque:</label>
+                    <input type="text" id="bloque" name="bloque" required>
+                </div>
+                <div>
+                    <label for="horario">Horario:</label>
+                    <select id="horario" name="horario" required>
+                        <option value="">Selecciona un horario</option>
+                        <option value="6:00-8:00">6:00 - 8:00</option>
+                        <option value="7:00-10:00">7:00 - 10:00</option>
+                        <option value="10:00-12:00">10:00 - 12:00</option>
+                        <option value="10:00-1:00">10:00 - 1:00</option>
+                        <option value="12:00-2:00">12:00 - 2:00</option>
+                        <option value="2:00-5:00">2:00 - 5:00</option>
+                        <option value="4:00-6:00">4:00 - 6:00</option>
+                        <option value="6:30-9:30">6:30 - 9:30</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="dia">Día:</label>
+                    <select id="dia" name="dia" required>
+                        <option value="">Selecciona un día</option>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                        <option value="Sábado">Sábado</option>
+                        <option value="Domingo">Domingo</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="profesor">Profesor:</label>
+                    <select id="profesor" name="profesor" required>
+                        <option value="">Seleccione un profesor</option>
+                    </select>
+                </div>
+                <button type="submit">Guardar</button>
+                <button type="button" id="update-button" style="display:none;">Actualizar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function redirectToProfile() {
+            window.location.href = 'perfil.html';
+                    function logout() {
+
+            alert("Sesión cerrada");
+            window.location.href = 'index.html'; 
+        }
+        }
+                function logout() {
+
+            alert("Sesión cerrada");
+            window.location.href = 'index.html'; 
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('salones-table').getElementsByTagName('tbody')[0];
+            const form = document.getElementById('salon-form');
+            const updateButton = document.getElementById('update-button');
+            const modal = document.getElementById('salon-modal');
+            const openFormButton = document.getElementById('open-form-button');
+            const closeButton = document.querySelector('.close-button');
+            const profesorSelect = document.getElementById('profesor');
+
+            openFormButton.addEventListener('click', () => {
+                form.reset();
+                document.getElementById('salon-id').value = '';
+                updateButton.style.display = 'none';
+                fillProfesorSelect(); // Llenar la lista de profesores
+                modal.style.display = 'block';
+            });
+
+            closeButton.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            function fetchSalones() {
+                fetch('http://localhost:8080/persona/api/v1/all')
+                    .then(response => response.json())
+                    .then(data => {
+                        tableBody.innerHTML = '';
+                        data.forEach(salon => {
+                            const row = tableBody.insertRow();
+                            row.insertCell(0).textContent = salon.id;
+                            row.insertCell(1).textContent = salon.salon;
+                            row.insertCell(2).textContent = salon.piso;
+                            row.insertCell(3).textContent = salon.bloque;
+                            row.insertCell(4).textContent = salon.horario;
+                            row.insertCell(5).textContent = salon.dia;
+                            row.insertCell(6).textContent = salon.profesor;
+
+                            const actionsCell = row.insertCell(7);
+                            const editButton = document.createElement('button');
+                            editButton.textContent = 'Editar';
+                            editButton.onclick = () => editSalon(salon);
+                            actionsCell.appendChild(editButton);
+
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Eliminar';
+                            deleteButton.onclick = () => deleteSalon(salon.id);
+                            actionsCell.appendChild(deleteButton);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function fetchUsuarios() {
+                return fetch('http://localhost:8080/usuarios/api/v1/all')
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('Error:', error);
+                        return [];
+                    });
+            }
+
+            function fillProfesorSelect() {
+                fetchUsuarios().then(usuarios => {
+                    profesorSelect.innerHTML = '<option value="">Seleccione un profesor</option>';
+                    usuarios.forEach(usuario => {
+                        const option = document.createElement('option');
+                        option.value = usuario.nombre + ' ' + usuario.apellido;
+                        option.textContent = usuario.nombre + ' ' + usuario.apellido;
+                        profesorSelect.appendChild(option);
+                    });
+                });
+            }
+
+            function saveSalon(salon) {
+                const isUpdating = salon.id && salon.id !== '';
+                const url = `http://localhost:8080/persona/api/v1/save/${isUpdating ? salon.id : 'null'}`;
+                console.log('Saving salon:', salon); // Log data before sending
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(salon),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(id => {
+                    console.log('Saved salon with ID:', id);
+                    form.reset();
+                    modal.style.display = 'none';
+                    fetchSalones();
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            function editSalon(salon) {
+                document.getElementById('salon-id').value = salon.id;
+                document.getElementById('salon').value = salon.salon;
+                document.getElementById('piso').value = salon.piso;
+                document.getElementById('bloque').value = salon.bloque;
+                document.getElementById('horario').value = salon.horario;
+                document.getElementById('dia').value = salon.dia;
+                document.getElementById('profesor').value = salon.profesor;
+                updateButton.style.display = 'block';
+                fillProfesorSelect(); // Llenar la lista de profesores
+                modal.style.display = 'block';
+            }
+
+            function deleteSalon(id) {
+                fetch(`http://localhost:8080/persona/api/v1/delete/${id}`)
+                    .then(() => fetchSalones())
+                    .catch(error => console.error('Error:', error));
+            }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const salon = {
+                    id: document.getElementById('salon-id').value,
+                    salon: document.getElementById('salon').value,
+                    piso: document.getElementById('piso').value,
+                    bloque: document.getElementById('bloque').value,
+                    horario: document.getElementById('horario').value,
+                    dia: document.getElementById('dia').value,
+                    profesor: document.getElementById('profesor').value
+                };
+                saveSalon(salon);
+            });
+
+            updateButton.addEventListener('click', function() {
+                const salon = {
+                    id: document.getElementById('salon-id').value,
+                    salon: document.getElementById('salon').value,
+                    piso: document.getElementById('piso').value,
+                    bloque: document.getElementById('bloque').value,
+                    horario: document.getElementById('horario').value,
+                    dia: document.getElementById('dia').value,
+                    profesor: document.getElementById('profesor').value
+                };
+                saveSalon(salon);
+                updateButton.style.display = 'none';
+            });
+
+            fetchSalones();
+        });
+    </script>
+</body>
+</html>
+

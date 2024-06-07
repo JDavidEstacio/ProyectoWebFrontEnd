@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interfaz de Usuario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="salones.html">Salones</a></li>
+            <li><a href="usuarios.html">Docentes</a></li>
+        </ul>
+        <div class="profile-icon" onclick="redirectToProfile()">
+            <img src="./Iconos/perfil.png" alt="Profile">
+        </div>
+        <!-- Nuevo botón de cerrar sesión con icono -->
+        <div class="logout-icon" onclick="logout()">
+            <img src="./Iconos/cerrar.png" alt="Cerrar Sesión">
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="option selected" onclick="redirectToSalonesPage()">
+            <div class="icon"><img src="./Iconos/salon.png" alt="Salones"></div>
+            <div class="text">SALONES</div>
+        </div>
+        <div class="option selected" onclick="redirectToUsuariosPage()">
+            <div class="icon"><img src="./Iconos/profesor.png" alt="Docentes"></div>
+            <div class="text">DOCENTES</div>
+        </div>
+    </div>
+
+    <script>
+        function redirectToProfile() {
+            window.location.href = 'perfil.html';
+        }
+
+        function redirectToSalonesPage() {
+            window.location.href = 'salones.html';
+        }
+
+        function redirectToUsuariosPage() {
+            window.location.href = 'usuarios.html';
+        }
+
+        function logout() {
+
+            alert("Sesión cerrada");
+            window.location.href = 'index.html'; 
+        }
+    </script>
+</body>
+</html>
